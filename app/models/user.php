@@ -15,6 +15,50 @@ class User
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getUserById($id)
+    {
+        $stmt = $this->db->prepare("SELECT * FROM users WHERE user_id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function getDb()
+    {
+        return $this->db;
+    }
+
+    public function updateProfile($id, $data)
+    {
+        try {
+            $fields = [
+                'full_name = :full_name',
+                'phone = :phone',
+                'address = :address',
+                'gender = :gender',
+                'date_of_birth = :date_of_birth'
+            ];
+            $params = [
+                ':id'            => $id,
+                ':full_name'     => $data['full_name'],
+                ':phone'         => $data['phone'],
+                ':address'       => $data['address'],
+                ':gender'        => $data['gender'],
+                ':date_of_birth' => $data['date_of_birth']
+            ];
+
+            if (!empty($data['password'])) {
+                $fields[] = 'password = :password';
+                $params[':password'] = password_hash($data['password'], PASSWORD_BCRYPT);
+            }
+
+            $sql = "UPDATE users SET " . implode(', ', $fields) . " WHERE user_id = :id";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute($params);
+        } catch (PDOException $e) {
+            return false;
+        }
+    }
+
     public function checkUserExist($username, $email) {
         $sql = "SELECT user_id FROM users 
                 WHERE username = :username OR email = :email 

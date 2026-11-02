@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book borrow information</title>
-    <link rel="stylesheet" href="../../../public/css/formAddBook.css" class="">
+    <link rel="stylesheet" href="css/formAddBook.css" class="">
 </head>
 <body>
     <?php  require_once __DIR__ . '/../layouts/headerAdmin.php';?>
@@ -26,8 +26,8 @@
             <label for="category">Category</label>
             <select id="category" name="categories_id" >
                 <?php foreach ($categories as $cat): ?>
-                    <option value="<?= $cat['id']; ?>" <?=  ($cat['id'] == $book['categories_id']) ? 'selected' : ''; ?>>
-                <?=  $cat['name'] ?>
+                    <option value="<?= $cat['categories_id']; ?>" <?=  ($cat['categories_id'] == $book['categories_id']) ? 'selected' : ''; ?>>
+                <?=  $cat['categories_name'] ?>
                 </option>
                 <?php endforeach; ?>
             </select>

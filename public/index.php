@@ -3,6 +3,7 @@ session_start();
 
 /* CONFIG*/
 require_once dirname(__DIR__) . '/config/config.php';
+require_once dirname(__DIR__) . '/app/core/Auth.php';
 
 /* MODELS*/
 require_once dirname(__DIR__) . '/app/models/user.php';
@@ -46,6 +47,22 @@ switch ($action) {
 
     case 'logout':
         $authController->logout();
+        break;
+
+    case 'profile':
+        $authController->profile();
+        break;
+
+    case 'update_profile':
+        $authController->updateProfile();
+        break;
+
+    case 'history':
+        $borrowController->history();
+        break;
+
+    case 'cancel_borrow_request':
+        $borrowController->cancelRequest();
         break;
 
     case 'listbook':
@@ -150,8 +167,29 @@ switch ($action) {
         $adminController->userManagement();
         break;
 
+    case 'admin_lock_user':
+        $adminController->lockUser();
+        break;
+
+    case 'admin_unlock_user':
+        $adminController->unlockUser();
+        break;
+
     case 'admin_statistic':
         $adminController->showStatistic();
+        break;
+
+    case 'admin_overdue_list':
+        $adminController->overdueList();
+        break;
+
+    case 'admin_send_reminder':
+        $id = $_GET['id'] ?? null;
+        $adminController->sendReminder($id);
+        break;
+
+    case 'admin_batch_reminder':
+        $adminController->batchSendReminders();
         break;
 
     default:

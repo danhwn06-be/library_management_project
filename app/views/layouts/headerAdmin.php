@@ -16,7 +16,10 @@ Auth::admin();
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
-    <link rel="stylesheet" href="public/css/headerAdmin.css">
+    <link rel="stylesheet" href="css/headerAdmin.css">
+    <?php if (!empty($pageCSS)): ?>
+    <link rel="stylesheet" href="css/<?= htmlspecialchars($pageCSS) ?>">
+    <?php endif; ?>
 </head>
 
 <body>
@@ -65,6 +68,11 @@ $current_action = isset($_GET['action']) ? $_GET['action'] : '';
            href="index.php?action=admin_borrow_list">
             Borrowing Management
         </a>
+
+        <a class="btn <?php echo ($current_action == 'admin_overdue_list') ? 'btn-danger' : 'btn-outline-danger'; ?> me-2" 
+           href="index.php?action=admin_overdue_list">
+            <i class="bi bi-exclamation-triangle me-1"></i>Overdue Reminders
+        </a>
         
         <a class="btn <?php echo ($current_action == 'admin_statistic') ? 'btn-outline-primary' : 'btn-outline-secondary'; ?>" 
            href="index.php?action=admin_statistic">
@@ -74,6 +82,3 @@ $current_action = isset($_GET['action']) ? $_GET['action'] : '';
     </div>
 </div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-</body>
-
-</html>

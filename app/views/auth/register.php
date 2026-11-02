@@ -1,9 +1,3 @@
-<<<<<<< HEAD
-=======
-<?php
-?>
->>>>>>> 3f7e7f9ac9d8183744203643594bbb23085f7663
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,20 +6,16 @@
     <title>Register - Library Management</title>
     
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../../../public/css/register.css">    
+    <link rel="stylesheet" href="css/register.css">    
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
-<<<<<<< HEAD
-    <script src="../../../public/js/script.js"></script>
 
-=======
->>>>>>> 3f7e7f9ac9d8183744203643594bbb23085f7663
 </head>
 <body>
 
     <div class="body-register">
         <div class="img-register">
-            <img src="../../../public/images/img-register.png" alt="" class="">
+            <img src="images/img-register.png" alt="" class="">
         </div>
 
         <div class="form-register">    

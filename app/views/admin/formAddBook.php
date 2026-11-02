@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book borrow information</title>
-    <link rel="stylesheet" href="../../../public/css/formAddBook.css" class="">
+    <link rel="stylesheet" href="css/formAddBook.css" class="">
 </head>
 <body>
     <?php  require_once __DIR__ . '/../layouts/headerAdmin.php';?>
@@ -26,12 +26,9 @@
         <label for="category">Category</label>
         <select id="category" name="categories_id" >
             <option value="">Category</option>
-            <option value="1">Fantasy</option>
-            <option value="2">Literature</option>
-            <option value="3">Mystery</option>
-            <option value="4">Romantic</option>
-            <option value="5">Self-help</option>
-            <option value="6">Science Fiction</option>
+            <?php foreach ($categories as $cat): ?>
+                <option value="<?= $cat['categories_id']; ?>"><?= $cat['categories_name']; ?></option>
+            <?php endforeach; ?>
         </select>
     </div>  
 

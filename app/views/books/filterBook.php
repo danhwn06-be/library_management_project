@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../../../public/css/bookListView.css">
+    <link rel="stylesheet" href="css/bookListView.css">
 </head>
 
 <body>

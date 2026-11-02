@@ -3,9 +3,9 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="../../../public/css/bookListView.css" class="">
-    <link rel="stylesheet" href="../../../public/css/style.css" class="">
-    <link rel="stylesheet" href="../../../public/js/slide.js" class="">
+    <link rel="stylesheet" href="css/bookListView.css" class="">
+    <link rel="stylesheet" href="css/style.css" class="">
+    <link rel="stylesheet" href="js/slide.js" class="">
 </head>
 
 <body>
@@ -14,10 +14,10 @@
         <?php if (!isset($_GET['id'])): ?>
             <div class="slider-container">
                 <div class="slider">
-                    <div class="slide"><img src="../../../public/images/slide1.jpg"></div>
-                    <div class="slide"><img src="../../../public/images/slide2.jpeg"></div>
-                    <div class="slide"><img src="../../../public/images/slide3.jpg"></div>
-                    <div class="slide"><img src="../../../public/images/slide4.jpg"></div>
+                    <div class="slide"><img src="images/slide1.jpg"></div>
+                    <div class="slide"><img src="images/slide2.jpeg"></div>
+                    <div class="slide"><img src="images/slide3.jpg"></div>
+                    <div class="slide"><img src="images/slide4.jpg"></div>
                 </div>
 
                 <button class="prev" onclick="moveSlide(-1)">&#10094;</button>
@@ -74,7 +74,7 @@
         <div class="pagination">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <a class="<?= ($i == $currentPage) ? 'active' : '' ?>"
-                    href="index.php?controller=book&action=showListBook&page=<?= $i ?>">
+                    href="index.php?action=listbook&page=<?= $i ?>">
                     <?= $i ?>
                 </a>
             <?php endfor; ?>

@@ -19,8 +19,11 @@ class AdminController
     private $bookCopiesModel;
         
 
+    private $db;
+
     public function __construct($db)
     {
+        $this->db = $db;
         $this->userModel = new User($db);
         
         $this->bookModel = new Book($db);
@@ -48,6 +51,7 @@ class AdminController
 
     public function bookManagement()
     {
+        Auth::admin();
         $categories = $this->categoryModel->getAllCategories();
 
         // 2. Phân trang
@@ -66,10 +70,12 @@ class AdminController
                                                             
 
     public function showAddBookForm() {
+        Auth::admin();
+        $categories = $this->categoryModel->getAllCategories();
         require_once __DIR__ . '/../views/admin/formAddBook.php';
-
     }
     public function doAddBook() {
+    Auth::admin();
     // Debug: Kiểm tra xem dữ liệu có gửi lên không
     // print_r($_POST); print_r($_FILES); die(); 
 
@@ -86,11 +92,22 @@ class AdminController
     ];
 
     if (isset($_FILES['book_image']) && $_FILES['book_image']['error'] == 0) {
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+        $ext = strtolower(pathinfo($_FILES['book_image']['name'], PATHINFO_EXTENSION));
+        $fileSize = $_FILES['book_image']['size'];
+
+        if (!in_array($ext, $allowedExtensions)) {
+            die("Error: Only JPG, JPEG, PNG and WEBP image files are allowed.");
+        }
+        if ($fileSize > 2 * 1024 * 1024) {
+            die("Error: Uploaded image size cannot exceed 2MB.");
+        }
+
         // Lưu ý: Đảm bảo thư mục "public/images/" đã tồn tại
         $folder = "public/images/";
         if (!is_dir($folder)) mkdir($folder, 0777, true); 
 
-        $filename = time() . "_" . $_FILES['book_image']['name'];
+        $filename = time() . "_" . preg_replace('/[^a-zA-Z0-9_\.]/', '', $_FILES['book_image']['name']);
         $destination = $folder . $filename;
 
         if (move_uploaded_file($_FILES['book_image']['tmp_name'], $destination)) {
@@ -110,6 +127,7 @@ class AdminController
     }
     
      public function showEditBookForm($id) {
+    Auth::admin();
     // Nếu $id truyền vào bị rỗng hoặc false, thử lấy trực tiếp từ $_GET lần nữa để chắc chắn
     if (!$id) {
         $id = $_GET['id'] ?? 0;
@@ -128,13 +146,28 @@ class AdminController
 }
 
     public function doEditBook() {
+        Auth::admin();
         $id = $_POST['book_id'] ?? 0;
         $oldBook = $this->bookModel->getBookById($id);
         $img_url = $oldBook['image_url'];
 
-        if (isset($_FILES['book_image'])&& $_FILES['book_image']['error']==0){
-            $filename = time() . "_" . $_FILES['book_image']['name'];
-            if (move_uploaded_file($_FILES['book_image']['tmp_name'], "public/images/".$filename)){
+        if (isset($_FILES['book_image']) && $_FILES['book_image']['error'] == 0){
+            $allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+            $ext = strtolower(pathinfo($_FILES['book_image']['name'], PATHINFO_EXTENSION));
+            $fileSize = $_FILES['book_image']['size'];
+
+            if (!in_array($ext, $allowedExtensions)) {
+                die("Error: Only JPG, JPEG, PNG and WEBP image files are allowed.");
+            }
+            if ($fileSize > 2 * 1024 * 1024) {
+                die("Error: Uploaded image size cannot exceed 2MB.");
+            }
+
+            $folder = "public/images/";
+            if (!is_dir($folder)) mkdir($folder, 0777, true);
+
+            $filename = time() . "_" . preg_replace('/[^a-zA-Z0-9_\.]/', '', $_FILES['book_image']['name']);
+            if (move_uploaded_file($_FILES['book_image']['tmp_name'], $folder . $filename)){
                 $img_url = $filename;
             }
         }
@@ -160,10 +193,14 @@ class AdminController
         }
             }
         public function doDeleteBook($id) {
+        Auth::admin();
         if ($id) {
-            $this->bookModel->deleteBook($id);
+            $success = $this->bookModel->deleteBook($id);
+            if (!$success) {
+                $_SESSION['delete_error'] = "Cannot delete this book because it is in a borrow request.";
+            }
         }
-        header("Location: index.php?action=book_management"); // Xóa xong quay về danh sách
+        header("Location: index.php?action=book_management"); 
         }
     public function updateStatus($id, $status)
 {
@@ -176,14 +213,19 @@ class AdminController
 
     $result = $this->borrowRequestBookModel->updateStatus($id, $status);
     
-    // Điều hướng về trang chi tiết hoặc danh sách kèm thông báo
-    header("Location: index.php?action=admin_borrow_list&msg=success");
+    if ($result) {
+        header("Location: index.php?action=admin_borrow_list&msg=success");
+    } else {
+        header("Location: index.php?action=admin_borrow_list&msg=error");
+    }
     exit();
 }
     public function show_form_import() {
+        Auth::admin();
         require_once __DIR__ . '/../views/admin/formImportBook.php';
     }
     public function doImportBook() {
+    Auth::admin();
     if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_FILES['excel_file'])) {
         $filePath = $_FILES['excel_file']['tmp_name'];
 
@@ -197,6 +239,8 @@ class AdminController
 
             $success = 0;
             $skipped = 0;
+
+            $this->db->beginTransaction();
 
             foreach ($data as $index => $row) {
                 if ($index == 0) continue; 
@@ -219,6 +263,7 @@ class AdminController
                     $skipped++;
                 }
             }
+            $this->db->commit();
            $_SESSION['import_result'] = [
                 'success' => $success,
                 'skipped' => $skipped
@@ -228,6 +273,9 @@ class AdminController
             exit();
 
         } catch (Exception $e) {
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
             die("Error loading file: " . $e->getMessage());
         }
     }
@@ -235,20 +283,80 @@ class AdminController
     
     public function userManagement()
     {
+        Auth::admin();
         $users = $this->userModel->getAllUsers();
         $categories = $this->categoryModel->getAllCategories();
         require_once __DIR__ . '/../views/admin/userManagement.php';
+    }
+
+    public function lockUser()
+    {
+        Auth::admin();
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            $this->userModel->lockUser($id);
+        }
+        header("Location: index.php?action=admin_user_list&msg=locked");
+        exit();
+    }
+
+    public function unlockUser()
+    {
+        Auth::admin();
+        $id = $_GET['id'] ?? null;
+        if ($id) {
+            $this->userModel->unlockUser($id);
+        }
+        header("Location: index.php?action=admin_user_list&msg=unlocked");
+        exit();
     }
 
 
     public function showStatistic()
     {
         Auth::admin();
-    $generalStats = $this->bookModel->getGeneralStatistics();
-    $categoryStats = $this->bookModel->countBooksByCategory();
-    
-    require_once __DIR__ . '/../views/admin/statistic.php';
-}
+        $generalStats = $this->bookModel->getGeneralStatistics();
+        $categoryStats = $this->bookModel->countBooksByCategory();
+        $overdueCount = $this->borrowRequestBookModel->countOverdueRequests();
+        
+        require_once __DIR__ . '/../views/admin/statistic.php';
     }
-    
+
+    public function overdueList()
+    {
+        Auth::admin();
+        $overdueRequests = $this->borrowRequestBookModel->getOverdueRequests();
+        $pendingReminderRequests = $this->borrowRequestBookModel->getOverdueRequestsPendingReminder(2);
+        $totalOverdue = count($overdueRequests);
+        $totalPendingReminder = count($pendingReminderRequests);
+
+        require dirname(__DIR__, 2) . '/app/views/admin/overdueList.php';
+    }
+
+    public function sendReminder($id)
+    {
+        Auth::admin();
+        if (!$id) {
+            header("Location: index.php?action=admin_overdue_list&msg=invalid");
+            exit();
+        }
+
+        $result = $this->borrowRequestBookModel->sendOverdueReminderEmail($id);
+        if ($result) {
+            header("Location: index.php?action=admin_overdue_list&msg=reminder_success");
+        } else {
+            header("Location: index.php?action=admin_overdue_list&msg=reminder_error");
+        }
+        exit();
+    }
+
+    public function batchSendReminders()
+    {
+        Auth::admin();
+        $result = $this->borrowRequestBookModel->sendAllPendingOverdueReminders(2);
+        $_SESSION['batch_reminder_result'] = $result;
+        header("Location: index.php?action=admin_overdue_list&msg=batch_completed");
+        exit();
+    }
+}
 ?>

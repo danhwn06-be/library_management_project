@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
-    <link rel="stylesheet" href="../../../public/css/bookRequest.css" class="">
+    <link rel="stylesheet" href="css/bookRequest.css" class="">
 </head>
 <body>
     <?php  require_once __DIR__ . '/../layouts/header.php';?>
@@ -26,7 +26,9 @@
                 <p><strong>Author:</strong> <?php echo $book['author']; ?></p>
                 <div class="quantity-control">
                     <strong>Quantity:</strong>
-                    <span id="qty-<?php echo $book['id']; ?>"><?php echo $book['quantity']; ?></span>
+                    <button class="btn-qty-minus" style="padding: 2px 8px; border-radius: 4px; border: 1px solid #ccc; background: #fff;" onclick="updateQty('<?php echo $book['id']; ?>', -1)">-</button>
+                    <span id="qty-<?php echo $book['id']; ?>" style="margin: 0 10px; font-weight: bold;"><?php echo $book['quantity']; ?></span>
+                    <button class="btn-qty-plus" style="padding: 2px 8px; border-radius: 4px; border: 1px solid #ccc; background: #fff;" onclick="updateQty('<?php echo $book['id']; ?>', 1)">+</button>
                 </div>
             </div>
         </div>
@@ -43,6 +45,6 @@
     </div>
 </div>
 <?php require_once __DIR__ . '/../layouts/footer.php'; ?>
-<script src="../../../public/js/script.js"></script>
+<script src="js/script.js"></script>
 </body>
 </html>

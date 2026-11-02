@@ -66,6 +66,7 @@ CREATE TABLE `borrow_requests` (
   `actual_return_date` DATETIME NULL,
   `quantity` INT DEFAULT 0 COMMENT 'Tổng số lượng sách trong phiếu mượn',
   `request_status` VARCHAR(50) DEFAULT 'Pending' COMMENT 'Pending, Approved, Rejected, Returned',
+  `note` TEXT NULL COMMENT 'Ghi chú của người mượn',
   FOREIGN KEY (`user_id`) REFERENCES `users`(`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 

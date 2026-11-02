@@ -21,4 +21,7 @@ class Database
     }
 }
 
+define('SMTP_USERNAME', getenv('SMTP_USERNAME') ?: 'ngocanhqb123end@gmail.com');
+define('SMTP_PASSWORD', getenv('SMTP_PASSWORD') ?: 'bcox uaxi ntpv txri'); // WARNING: Use .env in production
+
 ?>

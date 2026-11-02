@@ -1,14 +1,7 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistic</title>
-    <link rel="stylesheet" href="../../../public/css/statistic.css" class="">
-</head>
-<body>
-    <?php  require_once __DIR__ . '/../layouts/headerAdmin.php';?>
-    <h2 class="title">GENERAL STATISTICS</h2> 
+<?php $pageCSS = 'statistic.css'; ?>
+<?php require_once __DIR__ . '/../layouts/headerAdmin.php'; ?>
+
+    <h2 class="title">GENERAL STATISTICS</h2>
     <div class="stats-container">
     <div class="stats-row">
         <div class="stats-left">
@@ -20,6 +13,11 @@
             <div class="stat-box box-blue-light">
                 <div class="stat-number"><?php echo $generalStats['total_requests']; ?></div>
                 <div class="stat-label">Borrowing request</div>
+            </div>
+
+            <div class="stat-box" style="background-color: #ffebee; border-left: 4px solid #ef5350; cursor: pointer;" onclick="window.location='index.php?action=admin_overdue_list'">
+                <div class="stat-number" style="color: #c62828;"><?php echo $overdueCount ?? 0; ?></div>
+                <div class="stat-label" style="color: #c62828;">Overdue requests <i class="bi bi-arrow-right"></i></div>
             </div>
         </div>
 
@@ -50,5 +48,6 @@
         </div>
     </div>
 </div>
+
 </body>
 </html>

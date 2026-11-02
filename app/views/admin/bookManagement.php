@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <title>Book Management</title>
-    <link rel="stylesheet" href="/public/css/admin.css">
+    <link rel="stylesheet" href="css/admin.css">
 
 </head>
 <body>
@@ -18,6 +18,18 @@
    
     <div class="container">
         <h1 class="text-center mt-4 mb-4">Book Management</h1>
+        <?php if (isset($_SESSION['import_result'])): ?>
+            <div class="alert alert-info">
+                Import completed: <?= $_SESSION['import_result']['success'] ?> success, <?= $_SESSION['import_result']['skipped'] ?> skipped.
+            </div>
+            <?php unset($_SESSION['import_result']); ?>
+        <?php endif; ?>
+        <?php if (isset($_SESSION['delete_error'])): ?>
+            <div class="alert alert-danger">
+                <?= $_SESSION['delete_error'] ?>
+            </div>
+            <?php unset($_SESSION['delete_error']); ?>
+        <?php endif; ?>
         <ul class="pagination">
             <?php for ($i = 1; $i <= $totalPages; $i++): ?>
                 <li class="<?php echo ($i == $currentPage) ? 'active' : ''; ?>">

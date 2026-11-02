@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book borrow information</title>
-    <link rel="stylesheet" href="../../../public/css/bookRequest.css" class="">
+    <link rel="stylesheet" href="css/bookRequest.css" class="">
 </head>
 <body>
     <?php  require_once __DIR__ . '/../layouts/header.php';?>
@@ -48,12 +48,18 @@
 
     <div class="form-group">
         <label>Borrow date:</label>
-        <input type="date" name="borrow_date" value="<?php echo date('Y-m-d'); ?>">
+        <input type="date" name="borrow_date" id="borrow_date" value="<?php echo date('Y-m-d'); ?>" min="<?php echo date('Y-m-d'); ?>">
     </div>
     
-    <div class="form-group">
-        <label>Return date:</label> 
-        <input type="date" name="return_date" required>
+    <div class="form-group" style="flex-direction: column; align-items: flex-start;">
+        <div style="display: flex; width: 100%; align-items: center;">
+            <label style="min-width: 120px;">Return date:</label> 
+            <input type="date" name="return_date" id="return_date" required 
+                   min="<?php echo date('Y-m-d'); ?>" 
+                   max="<?php echo date('Y-m-d', strtotime('+14 days')); ?>"
+                   value="<?php echo date('Y-m-d', strtotime('+14 days')); ?>" style="flex: 1;">
+        </div>
+        <small style="color: #666; margin-left: 120px; font-size: 0.85rem;">* Thời hạn mượn tối đa 14 ngày (Maximum borrow duration: 14 days)</small>
     </div>
 
     <div class="form-group" style="flex-direction: column; align-items: flex-start; gap: 10px;">

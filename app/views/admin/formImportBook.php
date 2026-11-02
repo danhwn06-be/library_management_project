@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Import Book</title>
-    <link rel="stylesheet" href="../../../public/css/style.css" class="">
+    <link rel="stylesheet" href="css/style.css" class="">
 </head>
 <body>
     <?php  require_once __DIR__ . '/../layouts/headerAdmin.php';?>
@@ -13,7 +13,7 @@
         <h3>Import Book</h3>
         
         <p style="margin-bottom: 15px;">
-            <a href="../../../public/templates/book_template.xlsx" download 
+            <a href="templates/book_template.xlsx" download 
                style="color: #007bff; text-decoration: none; font-size: 0.9em;">
                📥 Tải file Excel mẫu tại đây
             </a>

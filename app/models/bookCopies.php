@@ -29,7 +29,7 @@ class BookCopies
                 bc.barcode -- Lấy trực tiếp barcode từ bảng copies
             FROM borrow_request_books brb
             JOIN books b ON brb.book_id = b.book_id
-            JOIN categories c ON b.categories_id = c.categories_id
+            LEFT JOIN categories c ON b.categories_id = c.categories_id
             -- Kết nối với bảng copies để lấy barcode đầu tiên khả dụng
             LEFT JOIN (
                 SELECT book_id, MIN(barcode) as barcode 

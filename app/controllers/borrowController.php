@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/../models/borrowRequest.php';
 require_once __DIR__ . '/../models/category.php';
+require_once dirname(__DIR__) . '/core/Auth.php';
 
 class BorrowController
 {
@@ -33,6 +34,16 @@ class BorrowController
     public function addToMyBook($bookId, $bookTitle, $author, $image)
     {
         $this->checkLogin();
+
+        // Kiểm tra tồn kho trước khi thêm vào giỏ (OI-16)
+        $stmt = $this->db->prepare("SELECT stock_quantity FROM books WHERE book_id = ?");
+        $stmt->execute([$bookId]);
+        $book = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$book || (int)$book['stock_quantity'] <= 0) {
+            echo "<script>alert('Sorry, this book is currently out of stock!'); window.history.back();</script>";
+            exit();
+        }
 
         $this->initCart();
 
@@ -103,6 +114,28 @@ class BorrowController
             $this->showMessage('Your borrowed book list is empty!', true);
         }
 
+        // Validate số lượng sách tối đa 5 cuốn (OI-16)
+        $totalQuantity = 0;
+        foreach ($books as $b) {
+            $totalQuantity += (int)$b['quantity'];
+        }
+        if ($totalQuantity > 5) {
+            $this->showMessage('You can only borrow a maximum of 5 books per request!', true);
+        }
+
+        // Validate ngày mượn và ngày trả (OI-16)
+        $bTime = strtotime(date('Y-m-d', strtotime($borrowData['borrowDate'])));
+        $rTime = strtotime(date('Y-m-d', strtotime($borrowData['returnDate'])));
+
+        if (!$rTime || $rTime < $bTime) {
+            $this->showMessage('Return date cannot be earlier than borrow date!', true);
+        }
+
+        $durationDays = ($rTime - $bTime) / (60 * 60 * 24);
+        if ($durationDays > 14) {
+            $this->showMessage('Borrow duration cannot exceed 14 days!', true);
+        }
+
         $isSuccess = $this->requestModel->createRequest(
             $borrowData['userId'],
             $borrowData['name'],
@@ -110,7 +143,8 @@ class BorrowController
             $borrowData['address'],
             $borrowData['borrowDate'],
             $borrowData['returnDate'],
-            $books
+            $books,
+            $borrowData['note']
         );
 
         if ($isSuccess) {
@@ -134,13 +168,21 @@ class BorrowController
     {
         Auth::user();
 
+        // Thời gian mượn: Lấy chính xác thời điểm thực tế bản ghi được tạo
+        $borrowDateTime = date('Y-m-d H:i:s');
+
+        // Thời gian hẹn trả: Lấy ngày chọn từ form và gán mốc cuối ngày (23:59:59)
+        $returnDateInput = $_POST['return_date'] ?? '';
+        $returnDateTime = !empty($returnDateInput) ? $returnDateInput . ' 23:59:59' : '';
+
         return [
-            'userId' => $_SESSION['user']['id'],
+            'userId'     => $_SESSION['user']['id'],
             'name'       => $_POST['name'] ?? '',
             'phone'      => $_POST['phone'] ?? '',
             'address'    => $_POST['address'] ?? '',
-            'borrowDate' => $_POST['borrow_date'] ?? date('Y-m-d'),
-            'returnDate' => $_POST['return_date'] ?? ''
+            'borrowDate' => $borrowDateTime,
+            'returnDate' => $returnDateTime,
+            'note'       => trim($_POST['note'] ?? '')
         ];
     }
 
@@ -183,15 +225,54 @@ class BorrowController
         Auth::user();
 
         $id = $_GET['id'] ?? null;
-        $qty = $_GET['qty'] ?? 1;
+        $qty = (int)($_GET['qty'] ?? 1);
 
-        if ($id && isset($_SESSION['my_book_cart'][$id])) {
-            // Bạn có thể thêm kiểm tra tồn kho tại đây nếu muốn
+        if ($id && isset($_SESSION['my_book_cart'][$id]) && $qty > 0) {
             $_SESSION['my_book_cart'][$id]['quantity'] = $qty;
             echo "Updated";
         } else {
             echo "Error";
         }
         exit(); // Ngắt kết nối để trả phản hồi sạch về cho Javascript
+    }
+
+    /**
+     * Hiển thị lịch sử mượn sách của người dùng
+     */
+    public function history()
+    {
+        $this->checkLogin();
+        Auth::user();
+
+        $userId = $_SESSION['user']['id'];
+        $categories = $this->categoryModel->getAllCategories();
+        $history = $this->requestModel->getHistoryByUserId($userId);
+
+        $successMsg = $_SESSION['history_success'] ?? null;
+        $errorMsg = $_SESSION['history_error'] ?? null;
+        unset($_SESSION['history_success'], $_SESSION['history_error']);
+
+        require_once dirname(__DIR__) . '/views/user/history.php';
+    }
+
+    /**
+     * Hủy yêu cầu mượn khi đang ở trạng thái Pending
+     */
+    public function cancelRequest()
+    {
+        $this->checkLogin();
+        Auth::user();
+
+        $requestId = $_GET['id'] ?? null;
+        if ($requestId) {
+            $isSuccess = $this->requestModel->cancelRequest($requestId, $_SESSION['user']['id']);
+            if ($isSuccess) {
+                $_SESSION['history_success'] = "Canceled borrow request #$requestId successfully!";
+            } else {
+                $_SESSION['history_error'] = "Unable to cancel borrow request #$requestId!";
+            }
+        }
+        header("Location: index.php?action=history");
+        exit();
     }
 }

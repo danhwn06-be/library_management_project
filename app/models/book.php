@@ -180,6 +180,12 @@ class Book
 
     public function deleteBook($id)
     {
+        $check = $this->conn->prepare("SELECT COUNT(*) FROM borrow_request_books WHERE book_id = ?");
+        $check->execute([$id]);
+        if ($check->fetchColumn() > 0) {
+            return false;
+        }
+
         $sql = "DELETE FROM books WHERE book_id = :id";
         $stmt = $this->conn->prepare($sql);
         $stmt->bindValue(':id', $id, PDO::PARAM_INT);
@@ -189,34 +195,27 @@ class Book
     //import book
     public function importBook($data)
     {
-        $sql = "INSERT INTO books (book_title, price, author, publisher, publish_year, stock_quantity, categories_id, content, image_url) 
-            VALUES (:book_title, :price, :author, :publisher, :publish_year, :stock_quantity, :categories_id, :content, :image_url)";
+        try {
+            $sql = "INSERT INTO books (book_title, price, author, publisher, publish_year, stock_quantity, categories_id, content, image_url) 
+                VALUES (:book_title, :price, :author, :publisher, :publish_year, :stock_quantity, :categories_id, :content, :image_url)";
 
-        $stmt = $this->conn->prepare($sql);
+            $stmt = $this->conn->prepare($sql);
 
-        $result = $stmt->execute([
-            ':book_title'     => $data['book_title'],
-            ':price'          => $data['price'],
-            ':author'         => $data['author'],
-            ':publisher'      => $data['publisher'],
-            ':publish_year'   => $data['publish_year'],
-            ':stock_quantity' => $data['stock_quantity'],
-            ':categories_id'  => $data['categories_id'],
-            ':content'        => $data['content'],
-            ':image_url'      => $data['image_url']
-        ]);
-
-        if (!$result) {
-            echo "<pre>";
-            print_r($stmt->errorInfo());
-            echo "Dữ liệu đang chèn: ";
-            print_r($data);
-            echo "</pre>";
-            die();
+            return $stmt->execute([
+                ':book_title'     => $data['book_title'],
+                ':price'          => $data['price'],
+                ':author'         => $data['author'],
+                ':publisher'      => $data['publisher'],
+                ':publish_year'   => $data['publish_year'],
+                ':stock_quantity' => $data['stock_quantity'],
+                ':categories_id'  => $data['categories_id'],
+                ':content'        => $data['content'],
+                ':image_url'      => $data['image_url']
+            ]);
+        } catch (Exception $e) {
+            return false;
         }
-
-    return $result;
-}
+    }
     // Thống kê chung
     public function getGeneralStatistics() {
     // Đếm tổng số sách

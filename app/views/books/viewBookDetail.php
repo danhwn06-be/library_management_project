@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($book['book_title']); ?> - TVAN Library</title>
-    <link rel="stylesheet" href="../../../public/css/viewBookDetail.css">
+    <link rel="stylesheet" href="css/viewBookDetail.css">
 </head>
 
 <body>
@@ -15,7 +15,7 @@
         <div class="book-detail-wrapper">
             <!-- Phần hình ảnh và thông tin cơ bản -->
             <div class="book-image-section">
-                <img src="<?php echo htmlspecialchars($book['image_url']); ?>"
+                <img src="images/<?php echo htmlspecialchars($book['image_url']); ?>"
                     alt="<?php echo htmlspecialchars($book['book_title']); ?>"
                     class="book-cover">
 
@@ -64,13 +64,16 @@
         // }); 
 
         // Xử lý nút Borrow
-        document.querySelector('.btn-borrow').addEventListener('click', function() {
-            <?php if ($book['stock_quantity'] > 0): ?>
-                window.location.href = 'index.php?controller=borrow&action=request&book_id=<?php echo $book['book_id']; ?>';
-            <?php else: ?>
-                alert('Sách hiện đang hết! Vui lòng quay lại sau.');
-            <?php endif; ?>
-        });
+        var btnBorrow = document.querySelector('.btn-borrow');
+        if (btnBorrow) {
+            btnBorrow.addEventListener('click', function() {
+                <?php if ($book['stock_quantity'] > 0): ?>
+                    window.location.href = 'index.php?controller=borrow&action=request&book_id=<?php echo $book['book_id']; ?>';
+                <?php else: ?>
+                    alert('Sách hiện đang hết! Vui lòng quay lại sau.');
+                <?php endif; ?>
+            });
+        }
     </script>
 </body>
 
